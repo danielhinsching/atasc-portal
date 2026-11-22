@@ -1,0 +1,35 @@
+import { mount } from '@vue/test-utils'
+import { describe, expect, it, vi } from 'vitest'
+import HeroDestaque from '../components/HeroDestaque.vue'
+
+const RouterLink = { props: ['to'], template: '<a :href="to"><slot /></a>' }
+const opts = { global: { stubs: { RouterLink } } }
+
+describe('Início', () => {
+  it('mostra os blocos na ordem de 04', async () => {
+    const { default: Home } = await import('./HomeView.vue')
+    const w = mount(Home, opts)
+    const ordem = w.findAll('[data-bloco]').map((e) => e.attributes('data-bloco'))
+    expect(ordem).toEqual(['destaque', 'acesso', 'eventos', 'noticias', 'agricolino', 'mapa'])
+  })
+  it('com listas vazias mostra estado vazio em cada bloco', async () => {
+    vi.resetModules()
+    vi.doMock('../data', () => ({ listarNoticias: () => [], listarEventosFuturos: () => [], ultimaEdicao: () => null, listarNucleos: () => [] }))
+    const { default: Home } = await import('./HomeView.vue')
+    const w = mount(Home, opts)
+    expect(w.text()).toContain('Nenhum evento agendado.')
+    expect(w.text()).toContain('Nenhuma notícia publicada ainda.')
+    expect(w.text()).toContain('Nenhuma edição publicada.')
+    expect(w.text()).toContain('Nenhum destaque no momento.')
+    vi.doUnmock('../data')
+  })
+  it('o destaque não usa timer de rotação automática', () => {
+    const spy = vi.spyOn(globalThis, 'setInterval')
+    mount(HeroDestaque, { ...opts, props: { itens: [
+      { slug: 'a', titulo: 'A', resumo: 'x', corpo: '', publicadoEm: '2026-01-01T00:00:00Z' },
+      { slug: 'b', titulo: 'B', resumo: 'y', corpo: '', publicadoEm: '2026-01-02T00:00:00Z' },
+    ] } })
+    expect(spy).not.toHaveBeenCalled()
+    spy.mockRestore()
+  })
+})

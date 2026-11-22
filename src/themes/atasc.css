@@ -1,0 +1,29 @@
+/* Tokens da entidade ATASC. Para outra associação, troque só este arquivo.
+   Valores provisórios (partida: referência ATARGS) até o logo vetorial do Eliton. */
+:root {
+  --cor-primaria: #00773f;
+  --cor-escura: #003b1f;
+  --cor-destaque: #a3d95b;
+  --fundo: #f4f6f9;
+  --texto: #333333;
+  --texto-suave: #5b6670;
+  --linha: #e1e6ea;
+  --raio-card: 12px;
+  --sombra-card: 0 5px 15px rgba(0, 0, 0, 0.1);
+  --altura-cabecalho: 80px;
+  --altura-barra-inferior: 64px;
+}
+
+@theme {
+  --color-primaria: var(--cor-primaria);
+  --color-escura: var(--cor-escura);
+  --color-destaque: var(--cor-destaque);
+  --color-fundo: var(--fundo);
+  --color-texto: var(--texto);
+  --color-suave: var(--texto-suave);
+  --color-linha: var(--linha);
+  --radius-card: var(--raio-card);
+  --shadow-card: var(--sombra-card);
+  --font-titulo: 'Montserrat', system-ui, sans-serif;
+  --font-corpo: 'Open Sans', system-ui, sans-serif;
+}
