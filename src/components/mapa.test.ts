@@ -80,7 +80,11 @@ describe('mapa de núcleos', () => {
     vi.unstubAllGlobals()
   })
 
-  it('não expõe contato quando o dado não existe', () => {
-    expect(pontosDeNucleos(listarNucleos()).every((p) => p.contato === undefined)).toBe(true)
+  it('mostra só o presidente e nunca e-mail ou telefone enquanto não houver autorização (LGPD)', () => {
+    const nucleos = listarNucleos()
+    const pontos = pontosDeNucleos(nucleos)
+    expect(pontos.every((p) => !/@|\(\d{2}\)/.test(p.contato ?? ''))).toBe(true)
+    expect(pontos.find((p) => p.id === 'chapeco')?.contato).toBe('Juarez Antonio Paduan')
+    expect(pontosDeNucleos([{ id: 'x', nome: 'X', cidade: 'X', lat: 1, lng: 1, organizado: true }])[0].contato).toBeUndefined()
   })
 })

@@ -1,11 +1,17 @@
 import type { Noticia } from './types'
 
-// EXEMPLO: textos ilustrativos. As notícias reais entram pelo painel (F1) e as antigas na F2.
+// Fonte: página Notícias do site atual (lida em 22/11/2026). Os documentos citados são PDFs do site atual;
+// o texto completo e os anexos entram na migração (F1: modelo; F2: até 100 notícias).
+const eleicoes = 'Eleições do SINTAGRI e da ATASC, gestão 2027–2030.'
 export const noticias: Noticia[] = [
-  { slug: 'exemplo-1', titulo: 'Notícia de exemplo: novo portal da ATASC', resumo: 'Texto ilustrativo para mostrar o layout da lista de notícias.', corpo: 'Este é um texto de exemplo para a página de detalhe.\n\nAs notícias reais serão publicadas pelo painel de edição.', publicadoEm: '2026-11-18T10:00:00-03:00', capa: '/exemplo/capa.svg' },
-  { slug: 'exemplo-2', titulo: 'Notícia de exemplo: encontro de núcleos', resumo: 'Outro texto ilustrativo, com resumo de duas linhas para testar o corte.', corpo: 'Corpo de exemplo.', publicadoEm: '2026-11-10T09:00:00-03:00', capa: '/exemplo/capa.svg' },
-  { slug: 'exemplo-3', titulo: 'Notícia de exemplo: oportunidades para técnicos', resumo: 'Resumo ilustrativo.', corpo: 'Corpo de exemplo.', publicadoEm: '2026-10-28T09:00:00-03:00' },
-  { slug: 'exemplo-4', titulo: 'Notícia de exemplo: legislação', resumo: 'Resumo ilustrativo.', corpo: 'Corpo de exemplo.', publicadoEm: '2026-10-05T09:00:00-03:00' },
+  { slug: 'resultado-eleicao-gestao-2027-2030', titulo: 'Publicação do resultado da eleição SINTAGRI e ATASC, gestão 2027 a 2030', resumo: 'Os editais com os resultados oficiais foram publicados no Diário Catarinense, jornal de circulação estadual.', corpo: 'Informamos aos filiados e demais interessados que os editais com os resultados oficiais das eleições do SINTAGRI e da ATASC foram publicados no Diário Catarinense.\n\nOs documentos na íntegra estão no site atual da ATASC e entram na migração.', publicadoEm: '2026-11-19T12:00:00-03:00' },
+  { slug: 'ata-comissao-eleitoral-2027-2030', titulo: 'Ata dos trabalhos da Comissão Eleitoral e da Mesa Apuradora, gestão 2027–2030', resumo: eleicoes, corpo: 'Ata dos trabalhos da Comissão Eleitoral e da Mesa Apuradora. O PDF da ata entra na migração.', publicadoEm: '2026-11-11T12:00:00-03:00' },
+  { slug: 'resultado-eleicao-2026', titulo: 'Resultado da eleição 2026 SINTAGRI e ATASC', resumo: eleicoes, corpo: 'Resultado da eleição 2026. O PDF entra na migração.', publicadoEm: '2026-11-07T12:00:00-03:00' },
+  { slug: 'zeresima-eleicao-2026', titulo: 'Zerésima da eleição 2026 SINTAGRI e ATASC', resumo: eleicoes, corpo: 'Zerésima da eleição 2026. O PDF entra na migração.', publicadoEm: '2026-11-07T11:00:00-03:00' },
+  { slug: 'lista-de-aptos-a-votar', titulo: 'Lista de aptos a votar', resumo: eleicoes, corpo: 'Lista de aptos a votar. O PDF entra na migração.', publicadoEm: '2026-11-06T12:00:00-03:00' },
+  { slug: 'tutorial-como-votar-2026', titulo: 'Tutorial de como votar na eleição 2026 SINTAGRI e ATASC', resumo: 'Passo a passo para votar na eleição.', corpo: 'Tutorial de votação da eleição 2026. O conteúdo entra na migração.', publicadoEm: '2026-11-06T10:00:00-03:00' },
+  { slug: 'edital-de-convocacao-005-2026', titulo: 'Edital de convocação nº 005/2026', resumo: 'Edital de convocação da ATASC.', corpo: 'Edital de convocação nº 005/2026. O PDF entra na migração.', publicadoEm: '2026-10-19T12:00:00-03:00' },
+  { slug: 'chapas-eleicao-2026', titulo: 'Chapas homologadas para a eleição SINTAGRI e ATASC', resumo: 'Comunicado oficial sobre o registro das chapas homologadas.', corpo: 'Em cumprimento às disposições estatutárias, aos regulamentos eleitorais e ao edital de convocação de 10 de outubro de 2026, comunicamos o registro oficial das chapas homologadas para o pleito do SINTAGRI e da ATASC.', publicadoEm: '2026-10-10T12:00:00-03:00' },
 ]
 
 export function listarNoticias(limite?: number): Noticia[] {

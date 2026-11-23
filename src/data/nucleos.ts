@@ -1,26 +1,51 @@
 import type { Nucleo } from './types'
 
-// EXEMPLO: cidades-sede aproximadas. A lista real vem do PDF "Núcleos Regionais 2024-2027" (ver 03).
-// Presidentes, e-mails e telefones ficam vazios até a ATASC autorizar a publicação (LGPD, ver 09).
-const base: Array<[string, number, number]> = [
-  ['Florianópolis', -27.595, -48.548], ['Joinville', -26.304, -48.846], ['Blumenau', -26.919, -49.066],
-  ['Chapecó', -27.1, -52.616], ['Lages', -27.816, -50.326], ['Criciúma', -28.677, -49.37],
-  ['Itajaí', -26.908, -48.662], ['Concórdia', -27.234, -52.027], ['Joaçaba', -27.174, -51.505],
-  ['Videira', -27.008, -51.154], ['Caçador', -26.775, -51.015], ['Rio do Sul', -27.214, -49.643],
-  ['Araranguá', -28.935, -49.486], ['Tubarão', -28.467, -49.007], ['Xanxerê', -26.877, -52.404],
-  ['São Miguel do Oeste', -26.724, -53.518], ['Canoinhas', -26.177, -50.39], ['Mafra', -26.111, -49.806],
-  ['Jaraguá do Sul', -26.486, -49.067], ['Brusque', -27.098, -48.917], ['São Bento do Sul', -26.249, -49.383],
-  ['Curitibanos', -27.282, -50.584], ['Itapiranga', -27.169, -53.717],
+// Fonte: PDF "Núcleos Regionais da ATASC 2024-2027" (site atual, lido em 22/11/2026).
+// Coordenadas são o centro de cada município (aproximadas). Telefones e e-mails dos presidentes
+// ficam fora até a ATASC autorizar a publicação (LGPD, ver 09).
+// A CONFIRMAR: Itapiranga e Joaçaba aparecem com o mesmo e-mail no PDF; grafia de "Elean" (São Lourenço do Oeste).
+type Linha = [cidade: string, presidente: string, lat: number | null, lng: number | null, organizado?: boolean]
+
+const linhas: Linha[] = [
+  ['Xanxerê', 'Dirceu Vicari', -26.877, -52.404],
+  ['Blumenau', 'Antônio Tiago da Silva', -26.919, -49.066],
+  ['Braço do Norte', 'Edson José Baesso', -28.274, -49.169],
+  ['Campo Erê', 'Etori Bortese', -26.395, -53.087, false],
+  ['Canoinhas', 'José Kobrokoski Junior', -26.177, -50.39],
+  ['Chapecó', 'Juarez Antonio Paduan', -27.1, -52.616],
+  ['Concórdia', 'Dirceu Rigo', -27.234, -52.027],
+  ['Criciúma', 'Gabriel do Nascimento', -28.677, -49.37],
+  ['Descanso', 'Marcioner Ricardo Marchioretto', -26.826, -53.502],
+  ['Florianópolis', 'Edson Carlos de Quadra', -27.595, -48.548],
+  ['Ipumirim', 'Sidi Libano', -27.077, -52.134],
+  ['Itajaí', 'Jurandyr Largura', -26.908, -48.662],
+  ['Itapiranga', 'Laudir Rafael Bressler', -27.169, -53.717],
+  ['Joaçaba', 'Cássio Luis Schiehl', -27.174, -51.505],
+  ['Joinville', 'Valdrene Regia Bizolo Sommer', -26.304, -48.846],
+  ['Palmitos', 'Caciano Biasoto', -27.07, -53.162],
+  ['Pinhalzinho', 'Márcio André Frey', -26.846, -52.992],
+  // Sem contato no PDF; coordenadas ficam vazias até confirmar se entra no mapa (ver 03).
+  ['Quilombo', 'Cassio Grigol', null, null],
+  ['São Joaquim', 'Bibiano Antunes Rodrigues', -28.294, -49.931],
+  ['São José do Cedro', 'Graziele Paula Dal Toe', -26.455, -53.495],
+  ['São Lourenço do Oeste', 'Elean José Balastrelli', -26.357, -52.85],
+  ['Rio do Sul', 'André Coelho', -27.214, -49.643],
+  ['Seara', 'Felipe Cezar Walter', -27.153, -52.311],
+  ['Tubarão', 'Antonio Nascimento de Oliveira', -28.467, -49.007],
+  ['Videira', 'Rodemar José Kopsel', -27.008, -51.154],
 ]
 
 const slug = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, '-')
 
-export const nucleos: Nucleo[] = [
-  ...base.map(([cidade, lat, lng]): Nucleo => ({ id: slug(cidade), nome: `Núcleo de ${cidade}`, cidade, lat, lng, organizado: true })),
-  // Sem coordenadas de propósito: exercita o caso "sem localização" (a confirmar com o Eliton).
-  { id: 'quilombo', nome: 'Núcleo de Quilombo', cidade: 'Quilombo', lat: null, lng: null, organizado: true },
-  { id: 'campo-ere', nome: 'Núcleo de Campo Erê', cidade: 'Campo Erê', lat: -26.395, lng: -53.087, organizado: false },
-]
+export const nucleos: Nucleo[] = linhas.map(([cidade, presidente, lat, lng, organizado = true]) => ({
+  id: slug(cidade),
+  nome: `Núcleo de ${cidade}`,
+  cidade,
+  lat,
+  lng,
+  organizado,
+  presidente,
+}))
 
 export function listarNucleos(): Nucleo[] {
   return nucleos

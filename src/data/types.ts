@@ -17,6 +17,11 @@ export interface Escola {
   tipo: string
   lat: number | null
   lng: number | null
+  mantenedora?: string
+  endereco?: string
+  telefone?: string
+  email?: string
+  site?: string
 }
 export interface Evento {
   slug: string
@@ -28,6 +33,7 @@ export interface Evento {
   resumo: string
   capa: string
   midias: string[]
+  link?: string
 }
 export interface Curso {
   slug: string

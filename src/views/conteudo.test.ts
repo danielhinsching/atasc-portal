@@ -29,8 +29,8 @@ describe('páginas institucionais', () => {
   })
   it('/empregos lista vagas e o detalhe abre', async () => {
     const w = await abrir('/empregos')
-    expect(w.text()).toContain('Técnico agrícola (vaga de exemplo)')
-    expect((await abrir('/empregos/exemplo-1')).find('h1').text()).toContain('vaga de exemplo')
+    expect(w.text()).toContain('Vinícola Legado')
+    expect((await abrir('/empregos/vinicola-legado')).find('h1').text()).toContain('Técnico agrícola')
     expect((await abrir('/empregos/x')).text()).toContain('Vaga não encontrada.')
   })
   it('/empregos sem vagas mostra estado vazio', async () => {

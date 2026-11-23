@@ -10,7 +10,7 @@ describe('Início', () => {
     const { default: Home } = await import('./HomeView.vue')
     const w = mount(Home, opts)
     const ordem = w.findAll('[data-bloco]').map((e) => e.attributes('data-bloco'))
-    expect(ordem).toEqual(['destaque', 'acesso', 'eventos', 'noticias', 'agricolino', 'mapa'])
+    expect(ordem).toEqual(['destaque', 'acesso', 'atalhos', 'eventos', 'noticias', 'fenata', 'agricolino', 'mapa'])
   })
   it('com listas vazias mostra estado vazio em cada bloco', async () => {
     vi.resetModules()
@@ -31,5 +31,20 @@ describe('Início', () => {
     ] } })
     expect(spy).not.toHaveBeenCalled()
     spy.mockRestore()
+  })
+})
+
+describe('Início: referência ATARGS', () => {
+  it('traz os 4 cards, incluindo a Tabela de Honorários', async () => {
+    const { default: Home } = await import('./HomeView.vue')
+    const w = mount(Home, opts)
+    expect(w.findAll('[data-card]').map((e) => e.attributes('data-card'))).toEqual(['tashop', 'honorarios', 'ebooks', 'cfta'])
+    expect(w.find('[data-card="honorarios"]').attributes('href')).toBe('https://honorarios.fenata.com.br/')
+  })
+  it('mostra Instagram da FENATA e Direto do CFTA', async () => {
+    const { default: Home } = await import('./HomeView.vue')
+    const w = mount(Home, opts)
+    expect(w.find('[data-widget="instagram"] a').attributes('href')).toBe('https://instagram.com/fenatabrasil')
+    expect(w.findAll('[data-widget="cfta"] li').length).toBe(8)
   })
 })

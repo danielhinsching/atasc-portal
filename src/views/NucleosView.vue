@@ -12,7 +12,7 @@ const selecionado = ref<string | undefined>()
 <template>
   <div class="mx-auto max-w-[1200px] px-5 py-8">
     <SecaoTitulo titulo="Núcleos regionais" />
-    <p class="mb-5 max-w-2xl text-suave">Encontre o núcleo da ATASC mais próximo de você. Lista de exemplo até a confirmação do Eliton.</p>
+    <p class="mb-5 max-w-2xl text-suave">Encontre o núcleo da ATASC mais próximo de você. Lista conforme o documento Núcleos Regionais 2024-2027.</p>
     <div class="grid gap-5 lg:grid-cols-[2fr_1fr]">
       <MapaPontos :pontos="pontos" :selecionado-id="selecionado" @selecionar="selecionado = $event" />
       <ul class="max-h-[480px] space-y-2 overflow-y-auto" aria-label="Lista de núcleos">

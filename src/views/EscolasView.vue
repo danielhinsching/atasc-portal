@@ -16,7 +16,7 @@ const selecionado = ref<string | undefined>()
 <template>
   <div class="mx-auto max-w-[1200px] px-5 py-8">
     <SecaoTitulo titulo="Escolas" />
-    <p class="mb-5 max-w-2xl text-suave">Instituições de ensino técnico agrícola de Santa Catarina. Lista de exemplo até a revisão com a ATASC.</p>
+    <p class="mb-5 max-w-2xl text-suave">Instituições de ensino técnico agrícola de Santa Catarina. Dados do site atual; endereços a completar com a ATASC.</p>
     <div class="grid gap-5 lg:grid-cols-[2fr_1fr]">
       <MapaPontos :pontos="pontos" :selecionado-id="selecionado" @selecionar="selecionado = $event" />
       <ul class="max-h-[480px] space-y-2 overflow-y-auto" aria-label="Lista de escolas">

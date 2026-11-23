@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { listarAgricolinos, listarEventosFuturos, listarNoticias, listarNucleos, ultimaEdicao } from './index'
 
-describe('dados de exemplo', () => {
+describe('dados importados do site atual', () => {
   it('tem 25 núcleos, 24 organizados, e Campo Erê não organizado', () => {
     const n = listarNucleos()
     expect(n).toHaveLength(25)
@@ -12,13 +12,13 @@ describe('dados de exemplo', () => {
     expect(listarNucleos().some((x) => x.lat === null)).toBe(true)
   })
   it('eventos futuros: só posteriores à data, em ordem', () => {
-    const f = listarEventosFuturos(new Date('2026-11-22'))
+    const f = listarEventosFuturos(new Date('2025-01-01'))
     expect(f.length).toBeGreaterThan(0)
-    expect(f.every((e) => new Date(e.inicio) > new Date('2026-11-22'))).toBe(true)
+    expect(f.every((e) => new Date(e.inicio) > new Date('2025-01-01'))).toBe(true)
     expect(listarEventosFuturos(new Date('2030-01-01'))).toEqual([])
   })
   it('última edição do Agricolino é a mais recente', () => {
-    expect(ultimaEdicao()?.mes).toBe('2026-11')
+    expect(ultimaEdicao()?.mes).toBe('2026-10')
     const ms = listarAgricolinos().map((a) => a.mes)
     expect(ms).toEqual([...ms].sort().reverse())
   })
