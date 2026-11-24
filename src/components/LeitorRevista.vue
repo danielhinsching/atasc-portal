@@ -3,7 +3,7 @@ import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url'
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue'
 import type { PageFlip } from 'page-flip'
 
-const props = defineProps<{ pdfUrl: string; titulo: string }>()
+const props = withDefaults(defineProps<{ pdfUrl: string; titulo: string; autoTelaCheia?: boolean; voltarPara?: string }>(), { autoTelaCheia: true, voltarPara: '/agricolino' })
 const emit = defineEmits<{ erro: [mensagem: string] }>()
 
 const estado = ref<'carregando' | 'pronto' | 'erro'>('carregando')
@@ -74,10 +74,10 @@ async function iniciar() {
       width: 350,
       height: Math.round(350 * (vp.height / vp.width)),
       size: 'stretch',
-      minWidth: 220,
-      maxWidth: 700,
-      minHeight: 300,
-      maxHeight: 1000,
+      minWidth: 200,
+      maxWidth: 1600,
+      minHeight: 280,
+      maxHeight: 2400,
       showCover: true,
       usePortrait: true,
       flippingTime: reduzido ? 0 : 700,
@@ -101,33 +101,57 @@ async function ajustarZoom(delta: number) {
   await nextTick()
   flip?.update()
 }
-function telaCheia() { void raiz.value?.requestFullscreen?.() }
+const emTelaCheia = ref(false)
+function telaCheia() {
+  if (document.fullscreenElement) void document.exitFullscreen?.()
+  else void raiz.value?.requestFullscreen?.()?.catch?.(() => {})
+}
+function aoMudarTelaCheia() {
+  emTelaCheia.value = !!document.fullscreenElement
+  // O tamanho do livro depende do contêiner: recalcula ao entrar/sair da tela cheia.
+  void nextTick(() => setTimeout(() => flip?.update(), 150))
+}
 function teclado(e: KeyboardEvent) {
   if (e.key === 'ArrowRight') { e.preventDefault(); proxima() }
   if (e.key === 'ArrowLeft') { e.preventDefault(); anterior() }
 }
 
-onMounted(() => { void iniciar() })
-onBeforeUnmount(() => { flip?.destroy(); flip = null })
+onMounted(() => {
+  void iniciar()
+  document.addEventListener('fullscreenchange', aoMudarTelaCheia)
+  window.addEventListener('resize', aoMudarTelaCheia)
+  // Por padrão abre em tela cheia (o navegador pode recusar sem gesto do usuário; o leitor já ocupa a janela inteira).
+  if (props.autoTelaCheia) telaCheia()
+  raiz.value?.focus()
+  document.documentElement.style.overflow = 'hidden'
+})
+onBeforeUnmount(() => {
+  document.documentElement.style.overflow = ''
+  document.removeEventListener('fullscreenchange', aoMudarTelaCheia)
+  window.removeEventListener('resize', aoMudarTelaCheia)
+  if (document.fullscreenElement) void document.exitFullscreen?.()
+  flip?.destroy(); flip = null
+})
 </script>
 
 <template>
-  <div ref="raiz" class="min-h-[560px] rounded-card bg-[#1a1a1a] p-3 text-white shadow-card" tabindex="0" role="group" :aria-label="`Leitor: ${titulo}`" @keydown="teclado">
-    <div class="mb-3 flex flex-wrap items-center gap-2 text-sm">
-      <button type="button" class="min-h-11 rounded-full bg-white/10 px-4 disabled:opacity-40" :disabled="estado !== 'pronto'" @click="anterior">Página anterior</button>
-      <button type="button" class="min-h-11 rounded-full bg-white/10 px-4 disabled:opacity-40" :disabled="estado !== 'pronto'" @click="proxima">Próxima página</button>
-      <span v-if="estado === 'pronto'" class="px-2" aria-live="polite">Página {{ pagina }} de {{ total }}</span>
-      <span class="ml-auto flex flex-wrap gap-2">
-        <button type="button" class="min-h-11 rounded-full bg-white/10 px-4 disabled:opacity-40" :disabled="estado !== 'pronto' || zoom <= 1" aria-label="Diminuir zoom" @click="ajustarZoom(-0.5)">−</button>
-        <button type="button" class="min-h-11 rounded-full bg-white/10 px-4 disabled:opacity-40" :disabled="estado !== 'pronto' || zoom >= 2" aria-label="Aumentar zoom" @click="ajustarZoom(0.5)">+</button>
-        <button type="button" class="min-h-11 rounded-full bg-white/10 px-4" @click="telaCheia">Tela cheia</button>
-        <a :href="pdfUrl" download class="inline-flex min-h-11 items-center rounded-full bg-destaque px-4 font-semibold text-escura">Baixar PDF</a>
+  <div ref="raiz" class="fixed inset-0 z-[60] flex h-dvh w-screen flex-col bg-[#1a1a1a] text-white outline-none" tabindex="0" role="group" :aria-label="`Leitor: ${titulo}`" @keydown="teclado">
+    <div class="flex flex-wrap items-center gap-1.5 p-2 text-sm sm:gap-2 sm:p-3">
+      <RouterLink :to="voltarPara" class="inline-flex min-h-11 items-center rounded-full bg-white/10 px-3 sm:px-4" aria-label="Voltar para as edições">← Voltar</RouterLink>
+      <button type="button" class="min-h-11 rounded-full bg-white/10 px-3 sm:px-4 disabled:opacity-40" :disabled="estado !== 'pronto'" @click="anterior" aria-label="Página anterior"><span aria-hidden="true" class="sm:hidden">‹</span><span class="hidden sm:inline">Página anterior</span></button>
+      <button type="button" class="min-h-11 rounded-full bg-white/10 px-3 sm:px-4 disabled:opacity-40" :disabled="estado !== 'pronto'" @click="proxima" aria-label="Próxima página"><span aria-hidden="true" class="sm:hidden">›</span><span class="hidden sm:inline">Próxima página</span></button>
+      <span v-if="estado === 'pronto'" class="px-1 sm:px-2" aria-live="polite">Página {{ pagina }} de {{ total }}</span>
+      <span class="ml-auto flex flex-wrap gap-1.5 sm:gap-2">
+        <button type="button" class="min-h-11 rounded-full bg-white/10 px-3 sm:px-4 disabled:opacity-40" :disabled="estado !== 'pronto' || zoom <= 1" aria-label="Diminuir zoom" @click="ajustarZoom(-0.5)">−</button>
+        <button type="button" class="min-h-11 rounded-full bg-white/10 px-3 sm:px-4 disabled:opacity-40" :disabled="estado !== 'pronto' || zoom >= 2" aria-label="Aumentar zoom" @click="ajustarZoom(0.5)">+</button>
+        <button type="button" class="min-h-11 rounded-full bg-white/10 px-3 sm:px-4" @click="telaCheia">{{ emTelaCheia ? 'Sair' : 'Tela cheia' }}</button>
+        <a :href="pdfUrl" download class="inline-flex min-h-11 items-center rounded-full bg-destaque px-3 sm:px-4 font-semibold text-escura">Baixar PDF</a>
       </span>
     </div>
     <p v-if="estado === 'carregando'" role="status" class="py-16 text-center text-white/80">Carregando a revista…</p>
     <p v-else-if="estado === 'erro'" role="alert" class="py-16 text-center text-white/90">{{ mensagem }}</p>
-    <div v-show="estado === 'pronto'" class="max-h-[80vh] overflow-auto">
-      <div ref="livro" class="mx-auto" :style="{ width: `${zoom * 100}%` }" />
+    <div v-show="estado === 'pronto'" class="min-h-0 flex-1 px-1 pb-2" :class="zoom > 1 ? 'overflow-auto' : 'overflow-hidden'">
+      <div ref="livro" class="mx-auto h-full" :style="{ width: `${zoom * 100}%`, height: `${zoom * 100}%` }" />
     </div>
   </div>
 </template>

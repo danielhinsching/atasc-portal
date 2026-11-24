@@ -95,10 +95,13 @@ const destaques = [...eventos.slice(0, 1), ...noticias.slice(0, 2)]
 
     <section data-bloco="agricolino">
       <SecaoTitulo titulo="Agricolino" to="/agricolino" rotulo-link="Ver edições" />
-      <RouterLink v-if="edicao" :to="`/agricolino/${edicao.id}`" class="flex items-center gap-5 rounded-card bg-white p-4 shadow-card">
-        <img :src="edicao.capa" alt="" class="h-32 w-24 rounded object-cover" />
-        <div><p class="font-titulo font-bold">{{ edicao.titulo }}</p><p class="text-sm text-suave">Leia a edição mais recente em formato de revista.</p></div>
-      </RouterLink>
+      <div v-if="edicao" class="flex items-center gap-5 rounded-card bg-white p-4 shadow-card">
+        <div class="relative shrink-0">
+          <img :src="edicao.capa" alt="" class="h-32 w-24 rounded object-cover" />
+          <RouterLink :to="`/agricolino/${edicao.id}`" class="absolute inset-x-1 bottom-1 inline-flex min-h-11 items-center justify-center rounded-full bg-black/75 px-2 text-xs font-semibold text-white backdrop-blur hover:bg-black/90" :aria-label="`Abrir ${edicao.titulo} em tela cheia`">⛶ Tela cheia</RouterLink>
+        </div>
+        <RouterLink :to="`/agricolino/${edicao.id}`"><p class="font-titulo font-bold">{{ edicao.titulo }}</p><p class="text-sm text-suave">Leia a edição mais recente em formato de revista.</p></RouterLink>
+      </div>
       <EstadoVazio v-else mensagem="Nenhuma edição publicada." />
     </section>
 

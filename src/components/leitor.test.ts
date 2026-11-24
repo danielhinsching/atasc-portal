@@ -43,7 +43,7 @@ describe('leitor em revista', () => {
   it('monta uma página por folha do PDF e avança por botão e por seta do teclado', async () => {
     const w = await montar()
     expect(w.findAll('.page')).toHaveLength(4)
-    await w.findAll('button').find((b) => b.text() === 'Próxima página')!.trigger('click')
+    await w.findAll('button').find((b) => b.attributes('aria-label') === 'Próxima página')!.trigger('click')
     await w.trigger('keydown', { key: 'ArrowRight' })
     await w.trigger('keydown', { key: 'ArrowLeft' })
     expect(instancias[0].flipNext).toHaveBeenCalledTimes(2)
