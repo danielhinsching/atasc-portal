@@ -48,3 +48,17 @@ describe('Início: referência ATARGS', () => {
     expect(w.findAll('[data-widget="cfta"] li').length).toBe(8)
   })
 })
+
+describe('Notícias da FENATA', () => {
+  it('lista todas as 52 notícias, mais recentes primeiro, com paginação', async () => {
+    const { todasNoticiasFenata } = await import('../data/fenata-todas')
+    expect(todasNoticiasFenata).toHaveLength(52)
+    const datas = todasNoticiasFenata.map((n) => n.data)
+    expect(datas).toEqual([...datas].sort().reverse())
+    const { default: V } = await import('./NoticiasFenataView.vue')
+    const w = mount(V, opts)
+    expect(w.findAll('li')).toHaveLength(12)
+    await w.find('button').trigger('click')
+    expect(w.findAll('li')).toHaveLength(24)
+  })
+})

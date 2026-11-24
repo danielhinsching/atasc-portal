@@ -33,6 +33,7 @@ export const routes = [
   { path: '/cursos/:slug', component: CursoView },
   { path: '/noticias', component: NoticiasView },
   { path: '/noticias/:slug', component: NoticiaView },
+  { path: '/noticias-fenata', component: () => import('../views/NoticiasFenataView.vue') },
   { path: '/agricolino', component: AgricolinoListaView },
   { path: '/agricolino/:id', component: AgricolinoView },
   { path: '/contato', component: ContatoView },

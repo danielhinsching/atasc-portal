@@ -62,10 +62,10 @@ const destaques = [...eventos.slice(0, 1), ...noticias.slice(0, 2)]
 
     <section data-bloco="fenata" class="grid gap-8 lg:grid-cols-[2fr_1fr]">
       <div>
-        <SecaoTitulo titulo="Últimas da FENATA" />
+        <SecaoTitulo titulo="Últimas da FENATA" to="/noticias-fenata" rotulo-link="Ver todas as notícias" />
         <ul class="space-y-4">
           <li v-for="n in noticiasFenata" :key="n.slug" class="flex gap-4 rounded-card bg-white p-4 shadow-card">
-            <img :src="n.capa" alt="" class="h-24 w-36 shrink-0 rounded object-cover" loading="lazy" />
+            <img :src="n.capa" alt="" referrerpolicy="no-referrer" class="h-24 w-36 shrink-0 rounded object-cover" loading="lazy" />
             <div class="min-w-0">
               <p class="text-xs text-suave">{{ fmtData(n.data) }}</p>
               <h3 class="font-titulo text-base font-bold"><a :href="n.href" target="_blank" rel="noopener noreferrer" class="hover:text-primaria">{{ n.titulo }}</a></h3>
