@@ -59,7 +59,6 @@ async function iniciar() {
       const div = document.createElement('div')
       div.className = 'page'
       div.style.background = '#fff'
-      if (i === 0 || i === total.value - 1) div.setAttribute('data-density', 'hard')
       const cv = document.createElement('canvas')
       cv.style.cssText = 'width:100%;height:100%;display:block'
       cv.setAttribute('role', 'img')
@@ -85,6 +84,10 @@ async function iniciar() {
       mobileScrollSupport: false,
     })
     flip.loadFromHTML(livro.value.querySelectorAll<HTMLElement>('.page'))
+    // O page-flip força capa e contracapa como páginas "duras" com showCover; mantém todas macias.
+    const paginas = (flip as unknown as { getPageCollection?: () => { getPages: () => Array<{ setDensity: (d: string) => void }> } })
+      .getPageCollection?.().getPages() ?? []
+    for (const p of paginas) { p.setDensity('soft'); p.setDensity = () => {} }
     flip.on('flip', (e) => { pagina.value = Number(e.data) + 1; vizinhas(Number(e.data)) })
     vizinhas(0)
   } catch (e) {

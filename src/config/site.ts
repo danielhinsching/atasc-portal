@@ -35,6 +35,7 @@ export const menuPrincipal: ItemMenu[] = [
     rotulo: 'Notícias',
     filhos: [
       { rotulo: 'Todas as notícias', to: '/noticias' },
+      { rotulo: 'Notícias da FENATA', to: '/noticias-fenata' },
       { rotulo: 'Agricolino', to: '/agricolino' },
     ],
   },
@@ -51,9 +52,9 @@ export const site = {
   // EXEMPLO: o número real e as redes sociais são enviados pelo Eliton (ver 09).
   whatsapp: '5548900000000',
   redes: [] as Array<{ rotulo: string; url: string }>,
-  // EXEMPLO: endereços reais do Proind a confirmar.
-  proindPF: 'https://proind.exemplo.invalid/associado',
-  proindPJ: 'https://proind.exemplo.invalid/empresa',
+  // Portal do associado no Proind (PF e PJ usam a mesma entrada).
+  proindPF: 'https://sweb.diretasistemas.com.br/prosindweb/index.php?sind=1660',
+  proindPJ: 'https://sweb.diretasistemas.com.br/prosindweb/index.php?sind=1660',
   coneia: 'https://coneia.exemplo.invalid',
   unitagri: 'https://unitagri.exemplo.invalid',
   // Agenda de TESTE (feriados do Brasil, pública do Google) até o Eliton liberar a agenda oficial da ATASC.
