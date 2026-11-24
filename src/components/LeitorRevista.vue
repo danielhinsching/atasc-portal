@@ -13,6 +13,7 @@ const pagina = ref(1)
 const total = ref(0)
 const raiz = ref<HTMLElement | null>(null)
 const livro = ref<HTMLElement | null>(null)
+const rolagem = ref<HTMLElement | null>(null)
 
 type PaginaPdf = { getViewport: (o: { scale: number }) => { width: number; height: number }; render: (o: { canvasContext: unknown; viewport: unknown; canvas?: unknown }) => { promise: Promise<void> } }
 let pdf: { numPages: number; getPage: (n: number) => Promise<PaginaPdf> } | null = null
@@ -88,7 +89,7 @@ async function iniciar() {
     const paginas = (flip as unknown as { getPageCollection?: () => { getPages: () => Array<{ setDensity: (d: string) => void }> } })
       .getPageCollection?.().getPages() ?? []
     for (const p of paginas) { p.setDensity('soft'); p.setDensity = () => {} }
-    flip.on('flip', (e) => { pagina.value = Number(e.data) + 1; vizinhas(Number(e.data)) })
+    flip.on('flip', (e) => { pagina.value = Number(e.data) + 1; vizinhas(Number(e.data)); if (zoom.value > 1) setTimeout(centralizar, 750) })
     vizinhas(0)
   } catch (e) {
     estado.value = 'erro'
@@ -99,10 +100,22 @@ async function iniciar() {
 
 function proxima() { flip?.flipNext() }
 function anterior() { flip?.flipPrev() }
+// Com zoom, leva a rolagem para a(s) página(s) visível(is): a capa fica à direita, a contracapa à esquerda.
+function centralizar() {
+  const c = rolagem.value
+  if (!c) return
+  const paisagem = !!livro.value?.querySelector('.stf__wrapper.--landscape')
+  let f = 0.5
+  if (paisagem && pagina.value === 1) f = 1
+  else if (paisagem && pagina.value === total.value && total.value % 2 === 0) f = 0
+  c.scrollLeft = (c.scrollWidth - c.clientWidth) * f
+  c.scrollTop = (c.scrollHeight - c.clientHeight) * 0.5
+}
 async function ajustarZoom(delta: number) {
   zoom.value = Math.min(2, Math.max(1, +(zoom.value + delta).toFixed(1)))
   await nextTick()
   flip?.update()
+  setTimeout(centralizar, 120)
 }
 const emTelaCheia = ref(false)
 function telaCheia() {
@@ -153,7 +166,7 @@ onBeforeUnmount(() => {
     </div>
     <p v-if="estado === 'carregando'" role="status" class="py-16 text-center text-white/80">Carregando a revista…</p>
     <p v-else-if="estado === 'erro'" role="alert" class="py-16 text-center text-white/90">{{ mensagem }}</p>
-    <div v-show="estado === 'pronto'" class="min-h-0 flex-1 px-1 pb-2" :class="zoom > 1 ? 'overflow-auto' : 'overflow-hidden'">
+    <div v-show="estado === 'pronto'" ref="rolagem" class="min-h-0 flex-1 px-1 pb-2" :class="zoom > 1 ? 'overflow-auto' : 'overflow-hidden'">
       <div ref="livro" class="mx-auto h-full" :style="{ width: `${zoom * 100}%`, height: `${zoom * 100}%` }" />
     </div>
   </div>
