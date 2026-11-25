@@ -15,7 +15,7 @@ watch(() => route?.fullPath, () => menu.fechar())
   <header class="sticky top-0 z-40 bg-primaria text-white shadow-[0_4px_10px_rgba(0,0,0,.15)]" style="height: var(--altura-cabecalho)">
     <div class="mx-auto flex h-full max-w-[1200px] items-center justify-between gap-4 px-5">
       <RouterLink to="/" class="flex items-center gap-2 font-titulo text-2xl font-extrabold" aria-label="ATASC, página inicial">
-        <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><path d="M17 3 31 29H3Z" fill="#a3d95b" /><path d="M17 12 24 25H10Z" fill="#003b1f" /></svg>
+        <img src="/logo-atasc.png" alt="" width="44" height="34" class="h-9 w-auto rounded bg-white p-0.5" />
         ATASC
       </RouterLink>
 
