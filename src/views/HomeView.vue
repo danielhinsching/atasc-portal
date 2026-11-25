@@ -48,7 +48,7 @@ const destaques = [...eventos.slice(0, 1), ...noticias.slice(0, 2)]
         </a>
       </div>
       <RouterLink to="/livro-conea" data-banner="livro-conea" class="mt-5 flex items-center gap-5 overflow-hidden rounded-card bg-white shadow-card transition hover:-translate-y-0.5">
-        <img :src="livroConea.capa" alt="" referrerpolicy="no-referrer" class="hidden h-32 w-56 shrink-0 object-cover sm:block" loading="lazy" />
+        <img :src="livroConea.capa" alt="" class="hidden w-28 shrink-0 self-stretch object-cover sm:block" loading="lazy" />
         <div class="p-5">
           <p class="font-titulo text-lg font-extrabold">{{ livroConea.titulo }}</p>
           <p class="text-sm text-suave">{{ livroConea.resumo }}</p>

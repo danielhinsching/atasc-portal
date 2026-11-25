@@ -19,7 +19,7 @@ export const cardsEntidades: CardEntidade[] = [
 export const livroConea = {
   titulo: 'Livro do CONEA',
   resumo: 'A proposta catarinense para a educação técnica agrícola, construída em cinco fóruns de ensino entre 2007 e 2012.',
-  capa: 'https://conea.com.br/wp-content/uploads/2018/08/livro_conea_noticia-800x463.jpg',
+  capa: '/livro-conea/capa.jpg',
   pdf: '/livro-conea/livro-digital-conea.pdf',
   origem: 'https://conea.com.br/noticia/livro-do-conea/',
 }
