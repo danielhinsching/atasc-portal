@@ -11,7 +11,7 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       manifest,
-      includeAssets: ['favicon.svg', 'exemplo/capa.svg'],
+      includeAssets: ['favicon.ico', 'favicon-32.png', 'favicon-48.png', 'apple-touch-icon.png', 'exemplo/capa.svg'],
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
         navigateFallback: '/index.html',
