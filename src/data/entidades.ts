@@ -15,7 +15,7 @@ export const cardsEntidades: CardEntidade[] = [
   { id: 'sintagri', titulo: 'Sintagri', subtitulo: 'Sindicato dos Técnicos Agrícolas de SC', href: 'https://www.tecnicoagricolasc.com.br/', icone: '⚖️', de: '#7aa63a', ate: '#3d5a14' },
 ]
 
-// PDF do livro: copiar de https://conea.com.br/wp-content/uploads/2018/08/Livro-Digital-CONEA.pdf para public/livro-conea/livro-digital-conea.pdf
+// PDF do livro (260 páginas): cópia de https://conea.com.br/wp-content/uploads/2018/08/Livro-Digital-CONEA.pdf
 export const livroConea = {
   titulo: 'Livro do CONEA',
   resumo: 'A proposta catarinense para a educação técnica agrícola, construída em cinco fóruns de ensino entre 2007 e 2012.',
