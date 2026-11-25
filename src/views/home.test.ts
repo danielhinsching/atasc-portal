@@ -10,7 +10,7 @@ describe('Início', () => {
     const { default: Home } = await import('./HomeView.vue')
     const w = mount(Home, opts)
     const ordem = w.findAll('[data-bloco]').map((e) => e.attributes('data-bloco'))
-    expect(ordem).toEqual(['destaque', 'acesso', 'atalhos', 'eventos', 'noticias', 'fenata', 'agricolino', 'mapa'])
+    expect(ordem).toEqual(['destaque', 'acesso', 'entidades', 'agricolino', 'eventos', 'noticias', 'atalhos', 'fenata', 'mapa'])
   })
   it('com listas vazias mostra estado vazio em cada bloco', async () => {
     vi.resetModules()
@@ -31,6 +31,15 @@ describe('Início', () => {
     ] } })
     expect(spy).not.toHaveBeenCalled()
     spy.mockRestore()
+  })
+})
+
+describe('Início: entidades da ATASC', () => {
+  it('traz cards de Unitagri, CONEA e Sintagri e o banner do Livro do CONEA', async () => {
+    const { default: Home } = await import('./HomeView.vue')
+    const w = mount(Home, opts)
+    expect(w.findAll('[data-entidade]').map((e) => e.attributes('data-entidade'))).toEqual(['unitagri', 'conea', 'sintagri'])
+    expect(w.find('[data-banner="livro-conea"]').attributes('href')).toBe('/livro-conea')
   })
 })
 

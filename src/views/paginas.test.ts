@@ -20,8 +20,10 @@ describe('páginas de conteúdo', () => {
     const w = await abrir('/escolas')
     expect(w.text()).toContain('Sede da ATASC')
     expect(w.text()).toContain('IFC Campus Araquari')
-    const ext = w.findAll('a[href^="http"]').filter((a) => /CONEIA|UNITAGRI/.test(a.text()))
-    expect(ext).toHaveLength(2)
+    expect(w.text()).toContain('Sede da Unitagri')
+    expect(w.text()).toContain('EPAGRI')
+    const ext = w.findAll('a[href^="http"]').filter((a) => /CONEA|UNITAGRI|SINTAGRI/.test(a.text()))
+    expect(ext).toHaveLength(3)
     ext.forEach((a) => expect(a.attributes('rel')).toContain('noopener'))
   })
   it('/eventos mostra agenda, próximos e anteriores', async () => {

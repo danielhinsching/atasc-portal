@@ -55,8 +55,9 @@ export const site = {
   // Portal do associado no Proind (PF e PJ usam a mesma entrada).
   proindPF: 'https://sweb.diretasistemas.com.br/prosindweb/index.php?sind=1660',
   proindPJ: 'https://sweb.diretasistemas.com.br/prosindweb/index.php?sind=1660',
-  coneia: 'https://coneia.exemplo.invalid',
-  unitagri: 'https://unitagri.exemplo.invalid',
+  conea: 'https://conea.com.br/',
+  unitagri: 'https://unitagri.com.br/',
+  sintagri: 'https://www.tecnicoagricolasc.com.br/',
   // Agenda de TESTE (feriados do Brasil, pública do Google) até o Eliton liberar a agenda oficial da ATASC.
   agendaGoogleId: 'pt.brazilian#holiday@group.v.calendar.google.com' as string,
   agendaDeTeste: true,

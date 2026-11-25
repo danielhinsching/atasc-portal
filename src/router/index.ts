@@ -7,6 +7,7 @@ import CursoView from '../views/CursoView.vue'
 import CursosView from '../views/CursosView.vue'
 import EmpregoView from '../views/EmpregoView.vue'
 import EmpregosView from '../views/EmpregosView.vue'
+import LivroConeaView from '../views/LivroConeaView.vue'
 import EntidadeView from '../views/EntidadeView.vue'
 import EscolasView from '../views/EscolasView.vue'
 import EventoView from '../views/EventoView.vue'
@@ -34,6 +35,7 @@ export const routes = [
   { path: '/noticias', component: NoticiasView },
   { path: '/noticias/:slug', component: NoticiaView },
   { path: '/noticias-fenata', component: () => import('../views/NoticiasFenataView.vue') },
+  { path: '/livro-conea', component: LivroConeaView },
   { path: '/agricolino', component: AgricolinoListaView },
   { path: '/agricolino/:id', component: AgricolinoView },
   { path: '/contato', component: ContatoView },

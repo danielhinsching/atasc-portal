@@ -1,4 +1,5 @@
 import type { Escola, Nucleo } from '../data'
+import { sedes } from '../data/sedes'
 
 export interface PontoMapa {
   id: string
@@ -8,6 +9,7 @@ export interface PontoMapa {
   lng: number | null
   contato?: string
   destaque?: boolean
+  foto?: string
 }
 
 export function pontosDeNucleos(nucleos: Nucleo[]): PontoMapa[] {
@@ -27,3 +29,7 @@ export function pontosDeEscolas(escolas: Escola[]): PontoMapa[] {
 }
 
 export const temLocalizacao = (p: PontoMapa): p is PontoMapa & { lat: number; lng: number } => p.lat !== null && p.lng !== null
+
+export function pontosDeSedes(): PontoMapa[] {
+  return sedes.map((s) => ({ id: `sede-${s.id}`, titulo: s.nome, subtitulo: s.endereco, lat: s.lat, lng: s.lng, contato: [s.telefone, s.email].filter(Boolean).join(' · ') || undefined, destaque: true, foto: s.fachada }))
+}

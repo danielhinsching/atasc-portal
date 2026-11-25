@@ -18,6 +18,13 @@ const marcadores = new Map<string, Marker>()
 
 function conteudoPopup(p: PontoMapa): HTMLElement {
   const d = document.createElement('div')
+  if (p.foto) {
+    const img = document.createElement('img')
+    img.src = p.foto
+    img.alt = `Fachada: ${p.titulo}`
+    img.style.cssText = 'display:block;width:200px;max-width:100%;height:auto;border-radius:6px;margin-bottom:6px'
+    d.append(img)
+  }
   const t = document.createElement('strong')
   t.textContent = p.titulo
   d.append(t)
