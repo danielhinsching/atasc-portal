@@ -24,8 +24,8 @@ export const escolas: Escola[] = [
 export const sede = {
   nome: 'Sede da ATASC',
   endereco: 'Rua Felipe Schmidt, 390, Ed. Florêncio Costa, Sala 1309, Centro, Florianópolis/SC',
-  lat: -27.5954,
-  lng: -48.5487,
+  lat: -27.59548,
+  lng: -48.55344,
 }
 
 export function listarEscolas(): Escola[] {
