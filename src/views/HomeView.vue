@@ -22,6 +22,29 @@ const destaques = [...eventos.slice(0, 1), ...noticias.slice(0, 2)]
 
 <template>
   <div class="mx-auto max-w-[1200px] space-y-12 px-5 py-8">
+    <section data-bloco="agricolino" aria-label="Leituras em destaque">
+      <div class="grid grid-cols-2 gap-3 sm:gap-5">
+        <RouterLink v-if="edicao" :to="`/agricolino/${edicao.id}`" data-card="agricolino" class="group flex flex-col overflow-hidden rounded-card bg-white shadow-card transition hover:-translate-y-0.5">
+          <img :src="edicao.capa" :alt="`Capa: ${edicao.titulo}`" class="aspect-[3/4] w-full object-cover" />
+          <div class="flex flex-1 flex-col p-3 sm:p-4">
+            <p class="text-[11px] font-bold uppercase text-primaria">Agricolino · edição mais recente</p>
+            <p class="mt-1 font-titulo text-sm font-bold leading-snug sm:text-base">{{ edicao.titulo }}</p>
+            <span class="mt-auto pt-2 text-xs font-bold uppercase text-primaria">Ler agora →</span>
+          </div>
+        </RouterLink>
+        <div v-else class="col-span-1"><EstadoVazio mensagem="Nenhuma edição publicada." /></div>
+        <RouterLink to="/livro-conea" data-banner="livro-conea" class="group flex flex-col overflow-hidden rounded-card bg-white shadow-card transition hover:-translate-y-0.5">
+          <img :src="livroConea.capa" :alt="`Capa: ${livroConea.titulo}`" class="aspect-[3/4] w-full object-cover" />
+          <div class="flex flex-1 flex-col p-3 sm:p-4">
+            <p class="text-[11px] font-bold uppercase text-primaria">Livro digital</p>
+            <p class="mt-1 font-titulo text-sm font-bold leading-snug sm:text-base">{{ livroConea.titulo }}</p>
+            <span class="mt-auto pt-2 text-xs font-bold uppercase text-primaria">Ler o livro →</span>
+          </div>
+        </RouterLink>
+      </div>
+      <p class="mt-3 text-right text-sm"><RouterLink to="/agricolino" class="font-semibold text-primaria hover:underline">Ver todas as edições do Agricolino</RouterLink></p>
+    </section>
+
     <div data-bloco="destaque" class="grid gap-5 lg:grid-cols-[2fr_1fr]">
       <HeroDestaque v-if="destaques.length" :itens="destaques" />
       <EstadoVazio v-else mensagem="Nenhum destaque no momento." />
@@ -47,26 +70,6 @@ const destaques = [...eventos.slice(0, 1), ...noticias.slice(0, 2)]
           <p class="text-sm text-white/90">{{ c.subtitulo }}</p>
         </a>
       </div>
-      <RouterLink to="/livro-conea" data-banner="livro-conea" class="mt-5 flex items-center gap-5 overflow-hidden rounded-card bg-white shadow-card transition hover:-translate-y-0.5">
-        <img :src="livroConea.capa" alt="" class="hidden w-28 shrink-0 self-stretch object-cover sm:block" loading="lazy" />
-        <div class="p-5">
-          <p class="font-titulo text-lg font-extrabold">{{ livroConea.titulo }}</p>
-          <p class="text-sm text-suave">{{ livroConea.resumo }}</p>
-          <span class="mt-2 inline-block text-xs font-bold uppercase text-primaria">Ler o livro →</span>
-        </div>
-      </RouterLink>
-    </section>
-
-    <section data-bloco="agricolino">
-      <SecaoTitulo titulo="Agricolino" to="/agricolino" rotulo-link="Ver edições" />
-      <div v-if="edicao" class="flex items-center gap-5 rounded-card bg-white p-4 shadow-card">
-        <div class="relative shrink-0">
-          <img :src="edicao.capa" alt="" class="h-32 w-24 rounded object-cover" />
-          <RouterLink :to="`/agricolino/${edicao.id}`" class="absolute inset-x-1 bottom-1 inline-flex min-h-11 items-center justify-center rounded-full bg-black/75 px-2 text-xs font-semibold text-white backdrop-blur hover:bg-black/90" :aria-label="`Abrir ${edicao.titulo} em tela cheia`">⛶ Tela cheia</RouterLink>
-        </div>
-        <RouterLink :to="`/agricolino/${edicao.id}`"><p class="font-titulo font-bold">{{ edicao.titulo }}</p><p class="text-sm text-suave">Leia a edição mais recente em formato de revista.</p></RouterLink>
-      </div>
-      <EstadoVazio v-else mensagem="Nenhuma edição publicada." />
     </section>
 
     <section data-bloco="eventos">

@@ -14,6 +14,14 @@ const total = ref(0)
 const raiz = ref<HTMLElement | null>(null)
 const livro = ref<HTMLElement | null>(null)
 const rolagem = ref<HTMLElement | null>(null)
+const lista = ref<HTMLElement | null>(null)
+// Celular/tablet pequeno: o livro com páginas virando pesa demais (travava). Lá a revista vira uma lista rolável,
+// que só desenha as páginas perto da tela e libera as que já passaram.
+const modoLista = typeof window !== 'undefined' && (window.innerWidth < 768 || (navigator.maxTouchPoints > 0 && window.innerWidth < 1024))
+let observador: IntersectionObserver | null = null
+let fila: Promise<void> = Promise.resolve()
+let razao = 1.414
+const MAX_PIXELS = 3_500_000
 
 type PaginaPdf = { getViewport: (o: { scale: number }) => { width: number; height: number }; render: (o: { canvasContext: unknown; viewport: unknown; canvas?: unknown }) => { promise: Promise<void> } }
 let pdf: { numPages: number; getPage: (n: number) => Promise<PaginaPdf> } | null = null
@@ -55,6 +63,7 @@ async function iniciar() {
     const vp = primeira.getViewport({ scale: 1 })
     estado.value = 'pronto'
     await nextTick()
+    if (modoLista) { montarLista(vp.height / vp.width); return }
     if (!livro.value) return
     for (let i = 0; i < total.value; i++) {
       const div = document.createElement('div')
@@ -98,8 +107,85 @@ async function iniciar() {
   }
 }
 
-function proxima() { flip?.flipNext() }
-function anterior() { flip?.flipPrev() }
+function larguraPagina() { return (lista.value?.clientWidth || window.innerWidth) }
+
+// Desenha uma página da lista, uma de cada vez (fila), com resolução limitada para não estourar a memória do celular.
+function desenharLista(indice: number) {
+  if (!pdf || desenhadas.has(indice)) return
+  desenhadas.add(indice)
+  fila = fila.then(async () => {
+    if (!desenhadas.has(indice)) return
+    try {
+      const p = await pdf!.getPage(indice + 1)
+      const base = p.getViewport({ scale: 1 })
+      const cv = canvases[indice]
+      const ctx = cv?.getContext('2d')
+      if (!cv || !ctx) return
+      let escala = (Math.min(2, window.devicePixelRatio || 1) * larguraPagina()) / base.width
+      const area = base.width * base.height * escala * escala
+      if (area > MAX_PIXELS) escala *= Math.sqrt(MAX_PIXELS / area)
+      const vp = p.getViewport({ scale: escala })
+      cv.width = Math.floor(vp.width)
+      cv.height = Math.floor(vp.height)
+      if (!desenhadas.has(indice)) { cv.width = cv.height = 0; return }
+      await p.render({ canvasContext: ctx, viewport: vp, canvas: cv }).promise
+    } catch {
+      desenhadas.delete(indice)
+    }
+  })
+}
+
+function liberarLista(indice: number) {
+  if (!desenhadas.delete(indice)) return
+  const cv = canvases[indice]
+  if (cv) { cv.width = 0; cv.height = 0 }
+}
+
+function montarLista(proporcao: number) {
+  const alvo = lista.value
+  if (!alvo) return
+  razao = proporcao
+  for (let i = 0; i < total.value; i++) {
+    const div = document.createElement('div')
+    div.className = 'folha'
+    div.dataset.indice = String(i)
+    div.style.cssText = `background:#fff;width:100%;aspect-ratio:1/${razao};margin:0 0 12px;box-shadow:0 2px 10px rgba(0,0,0,.5)`
+    const cv = document.createElement('canvas')
+    cv.style.cssText = 'width:100%;height:100%;display:block'
+    cv.setAttribute('role', 'img')
+    cv.setAttribute('aria-label', `${props.titulo}, página ${i + 1} de ${total.value}`)
+    div.append(cv)
+    alvo.append(div)
+    canvases.push(cv)
+  }
+  if (typeof IntersectionObserver === 'undefined') { for (let i = 0; i < Math.min(3, total.value); i++) desenharLista(i); return }
+  observador = new IntersectionObserver((entradas) => {
+    for (const e of entradas) {
+      const i = Number((e.target as HTMLElement).dataset.indice)
+      if (e.isIntersecting) desenharLista(i)
+      else liberarLista(i)
+    }
+  }, { root: rolagem.value, rootMargin: '120% 0px' })
+  alvo.querySelectorAll('.folha').forEach((el) => observador!.observe(el))
+}
+
+function aoRolar() {
+  const c = rolagem.value
+  if (!modoLista || !c || !total.value) return
+  const alturaFolha = (lista.value?.clientWidth ?? 1) * razao + 12
+  pagina.value = Math.min(total.value, Math.max(1, Math.floor((c.scrollTop + c.clientHeight / 3) / alturaFolha) + 1))
+}
+
+function irParaPagina(n: number) {
+  const c = rolagem.value
+  if (!c) return
+  const alvo = Math.min(total.value, Math.max(1, n))
+  const alturaFolha = (lista.value?.clientWidth ?? 1) * razao + 12
+  c.scrollTo({ top: (alvo - 1) * alturaFolha, behavior: 'smooth' })
+}
+
+function proxima() { if (modoLista) irParaPagina(pagina.value + 1); else flip?.flipNext() }
+function anterior() { if (modoLista) irParaPagina(pagina.value - 1); else flip?.flipPrev() }
 // Com zoom, leva a rolagem para a(s) página(s) visível(is): a capa fica à direita, a contracapa à esquerda.
 function centralizar() {
   const c = rolagem.value
@@ -114,6 +200,10 @@ function centralizar() {
 async function ajustarZoom(delta: number) {
   zoom.value = Math.min(2, Math.max(1, +(zoom.value + delta).toFixed(1)))
   await nextTick()
+  if (modoLista) {
+    for (const i of [...desenhadas]) { liberarLista(i); desenharLista(i) }
+    return
+  }
   flip?.update()
   setTimeout(centralizar, 120)
 }
@@ -137,7 +227,7 @@ onMounted(() => {
   document.addEventListener('fullscreenchange', aoMudarTelaCheia)
   window.addEventListener('resize', aoMudarTelaCheia)
   // Por padrão abre em tela cheia (o navegador pode recusar sem gesto do usuário; o leitor já ocupa a janela inteira).
-  if (props.autoTelaCheia) telaCheia()
+  if (props.autoTelaCheia && !modoLista) telaCheia()
   raiz.value?.focus()
   document.documentElement.style.overflow = 'hidden'
 })
@@ -147,6 +237,8 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', aoMudarTelaCheia)
   if (document.fullscreenElement) void document.exitFullscreen?.()
   flip?.destroy(); flip = null
+  observador?.disconnect(); observador = null
+  for (const cv of canvases) { cv.width = 0; cv.height = 0 }
 })
 </script>
 
@@ -166,8 +258,9 @@ onBeforeUnmount(() => {
     </div>
     <p v-if="estado === 'carregando'" role="status" class="py-16 text-center text-white/80">Carregando a revista…</p>
     <p v-else-if="estado === 'erro'" role="alert" class="py-16 text-center text-white/90">{{ mensagem }}</p>
-    <div v-show="estado === 'pronto'" ref="rolagem" class="min-h-0 flex-1 px-1 pb-2" :class="zoom > 1 ? 'overflow-auto' : 'overflow-hidden'">
-      <div ref="livro" class="mx-auto h-full" :style="{ width: `${zoom * 100}%`, height: `${zoom * 100}%` }" />
+    <div v-show="estado === 'pronto'" ref="rolagem" class="min-h-0 flex-1 px-1 pb-2" :class="modoLista ? 'overflow-auto overscroll-contain' : zoom > 1 ? 'overflow-auto' : 'overflow-hidden'" @scroll.passive="aoRolar">
+      <div v-if="modoLista" ref="lista" class="mx-auto" :style="{ width: `${zoom * 100}%` }" />
+      <div v-else ref="livro" class="mx-auto h-full" :style="{ width: `${zoom * 100}%`, height: `${zoom * 100}%` }" />
     </div>
   </div>
 </template>

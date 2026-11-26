@@ -10,7 +10,7 @@ describe('Início', () => {
     const { default: Home } = await import('./HomeView.vue')
     const w = mount(Home, opts)
     const ordem = w.findAll('[data-bloco]').map((e) => e.attributes('data-bloco'))
-    expect(ordem).toEqual(['destaque', 'acesso', 'entidades', 'agricolino', 'eventos', 'noticias', 'atalhos', 'fenata', 'mapa'])
+    expect(ordem).toEqual(['agricolino', 'destaque', 'acesso', 'entidades', 'eventos', 'noticias', 'atalhos', 'fenata', 'mapa'])
   })
   it('com listas vazias mostra estado vazio em cada bloco', async () => {
     vi.resetModules()
