@@ -135,14 +135,45 @@ function centralizar() {
   c.scrollLeft = (c.scrollWidth - c.clientWidth) * f
   c.scrollTop = (c.scrollHeight - c.clientHeight) * 0.5
 }
-async function ajustarZoom(delta: number) {
-  zoom.value = Math.min(2, Math.max(1, +(zoom.value + delta).toFixed(1)))
+const ZOOM_MAX = 3
+async function definirZoom(novo: number) {
+  const z = Math.min(ZOOM_MAX, Math.max(1, Math.round(novo * 10) / 10))
+  if (z === zoom.value) { if (livro.value) livro.value.style.transform = ''; return }
+  zoom.value = z
   await nextTick()
+  if (livro.value) livro.value.style.transform = ''
   // Zoom pede mais resolução: redesenha as páginas visíveis.
   for (const i of [...desenhadas]) liberar(i)
   vizinhas(centroAtual)
   flip?.update()
   setTimeout(centralizar, 120)
+}
+function ajustarZoom(delta: number) { return definirZoom(zoom.value + delta) }
+
+// Pinça (dois dedos) para dar zoom e arrastar com um dedo para mover quando ampliado.
+// Em captura, para o PageFlip não tratar esses gestos como virada de página.
+let pinca: { d0: number; z0: number; z: number } | null = null
+const distancia = (t: TouchList) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY)
+function aoTocar(e: TouchEvent) {
+  if (e.touches.length === 2) {
+    pinca = { d0: distancia(e.touches), z0: zoom.value, z: zoom.value }
+    e.preventDefault(); e.stopPropagation()
+  } else if (zoom.value > 1) e.stopPropagation()
+}
+function aoMoverToque(e: TouchEvent) {
+  if (pinca && e.touches.length === 2) {
+    e.preventDefault(); e.stopPropagation()
+    pinca.z = Math.min(ZOOM_MAX, Math.max(1, pinca.z0 * (distancia(e.touches) / pinca.d0)))
+    // Prévia barata por transformação; a página é redesenhada com mais nitidez ao soltar.
+    if (livro.value) { livro.value.style.transformOrigin = 'center top'; livro.value.style.transform = `scale(${pinca.z / pinca.z0})` }
+  } else if (zoom.value > 1) e.stopPropagation()
+}
+function aoSoltarToque(e: TouchEvent) {
+  if (pinca && e.touches.length < 2) {
+    const z = pinca.z
+    pinca = null
+    void definirZoom(z)
+  } else if (zoom.value > 1) e.stopPropagation()
 }
 const emTelaCheia = ref(false)
 function telaCheia() {
@@ -161,6 +192,11 @@ function teclado(e: KeyboardEvent) {
 
 onMounted(() => {
   void iniciar()
+  const r = rolagem.value
+  r?.addEventListener('touchstart', aoTocar, { capture: true, passive: false })
+  r?.addEventListener('touchmove', aoMoverToque, { capture: true, passive: false })
+  r?.addEventListener('touchend', aoSoltarToque, { capture: true, passive: false })
+  r?.addEventListener('touchcancel', aoSoltarToque, { capture: true, passive: false })
   document.addEventListener('fullscreenchange', aoMudarTelaCheia)
   window.addEventListener('resize', aoMudarTelaCheia)
   // Por padrão abre em tela cheia (o navegador pode recusar sem gesto do usuário; o leitor já ocupa a janela inteira).
@@ -169,6 +205,11 @@ onMounted(() => {
   document.documentElement.style.overflow = 'hidden'
 })
 onBeforeUnmount(() => {
+  const r = rolagem.value
+  r?.removeEventListener('touchstart', aoTocar, { capture: true })
+  r?.removeEventListener('touchmove', aoMoverToque, { capture: true })
+  r?.removeEventListener('touchend', aoSoltarToque, { capture: true })
+  r?.removeEventListener('touchcancel', aoSoltarToque, { capture: true })
   document.documentElement.style.overflow = ''
   document.removeEventListener('fullscreenchange', aoMudarTelaCheia)
   window.removeEventListener('resize', aoMudarTelaCheia)
@@ -187,14 +228,14 @@ onBeforeUnmount(() => {
       <span v-if="estado === 'pronto'" class="px-1 sm:px-2" aria-live="polite">Página {{ pagina }} de {{ total }}</span>
       <span class="ml-auto flex flex-wrap gap-1.5 sm:gap-2">
         <button type="button" class="min-h-11 rounded-full bg-white/10 px-3 sm:px-4 disabled:opacity-40" :disabled="estado !== 'pronto' || zoom <= 1" aria-label="Diminuir zoom" @click="ajustarZoom(-0.5)">−</button>
-        <button type="button" class="min-h-11 rounded-full bg-white/10 px-3 sm:px-4 disabled:opacity-40" :disabled="estado !== 'pronto' || zoom >= 2" aria-label="Aumentar zoom" @click="ajustarZoom(0.5)">+</button>
+        <button type="button" class="min-h-11 rounded-full bg-white/10 px-3 sm:px-4 disabled:opacity-40" :disabled="estado !== 'pronto' || zoom >= 3" aria-label="Aumentar zoom" @click="ajustarZoom(0.5)">+</button>
         <button type="button" class="min-h-11 rounded-full bg-white/10 px-3 sm:px-4" @click="telaCheia">{{ emTelaCheia ? 'Sair' : 'Tela cheia' }}</button>
         <a :href="pdfUrl" download class="inline-flex min-h-11 items-center rounded-full bg-destaque px-3 sm:px-4 font-semibold text-escura">Baixar PDF</a>
       </span>
     </div>
     <p v-if="estado === 'carregando'" role="status" class="py-16 text-center text-white/80">Carregando a revista…</p>
     <p v-else-if="estado === 'erro'" role="alert" class="py-16 text-center text-white/90">{{ mensagem }}</p>
-    <div v-show="estado === 'pronto'" ref="rolagem" class="min-h-0 flex-1 px-1 pb-2" :class="zoom > 1 ? 'overflow-auto' : 'overflow-hidden'">
+    <div v-show="estado === 'pronto'" ref="rolagem" class="min-h-0 flex-1 px-1 pb-2" :class="zoom > 1 ? 'overflow-auto' : 'overflow-hidden'" :style="{ touchAction: zoom > 1 ? 'pan-x pan-y' : 'none' }">
       <div ref="livro" class="mx-auto h-full" :style="{ width: `${zoom * 100}%`, height: `${zoom * 100}%` }" />
     </div>
   </div>
