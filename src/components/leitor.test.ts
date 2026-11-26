@@ -65,14 +65,13 @@ describe('leitor em revista', () => {
     expect(instancias[0].opts.drawShadow).toBe(false)
   })
 
-  it('em tela pequena usa lista rolável (sem PageFlip) e avança por rolagem', async () => {
+  it('em tela pequena mantém o efeito de revista (PageFlip) e não força tela cheia', async () => {
     const largura = window.innerWidth
     Object.defineProperty(window, 'innerWidth', { value: 390, configurable: true })
     try {
       const w = await montar()
-      expect(instancias).toHaveLength(0)
-      expect(w.findAll('.folha')).toHaveLength(4)
-      expect(w.text()).toContain('Página 1 de 4')
+      expect(instancias).toHaveLength(1)
+      expect(w.findAll('.page')).toHaveLength(4)
       w.unmount()
     } finally {
       Object.defineProperty(window, 'innerWidth', { value: largura, configurable: true })
