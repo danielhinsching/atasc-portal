@@ -17,6 +17,7 @@ const noticia = computed(() => buscarNoticia(String(route.params.slug)))
       <h1 class="mb-5 font-titulo text-3xl font-extrabold">{{ noticia.titulo }}</h1>
       <img v-if="noticia.capa" :src="noticia.capa" alt="" class="mb-5 aspect-video w-full rounded-card object-cover" />
       <p class="whitespace-pre-line">{{ noticia.corpo }}</p>
+      <img v-if="noticia.arte" :src="noticia.arte" alt="Arte de divulgação da notícia" loading="lazy" class="mx-auto mt-8 w-full max-w-[560px] rounded-card shadow-card" />
     </template>
     <EstadoVazio v-else class="mt-5" mensagem="Notícia não encontrada." />
   </article>

@@ -50,6 +50,7 @@ export interface Noticia {
   corpo: string
   publicadoEm: string // ISO
   capa?: string
+  arte?: string // arte/cartaz completo exibido no detalhe
 }
 export interface Agricolino {
   id: string
