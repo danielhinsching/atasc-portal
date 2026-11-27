@@ -25,6 +25,15 @@ type PaginaPdf = { getViewport: (o: { scale: number }) => { width: number; heigh
 let pdf: { numPages: number; getPage: (n: number) => Promise<PaginaPdf> } | null = null
 let flip: PageFlip | null = null
 const desenhadas = new Set<number>()
+const largDesenhada = new Map<number, number>()
+// Largura real de uma página na tela. O page-flip só ajusta o tamanho depois de montar,
+// então a largura do contêiner da página no começo (350) não serve para calcular a resolução.
+function larguraPagina(): number {
+  const bloco = livro.value?.querySelector<HTMLElement>('.stf__block')
+  if (!bloco || !bloco.clientWidth) return 350
+  const dupla = !!livro.value?.querySelector('.stf__wrapper.--landscape')
+  return bloco.clientWidth / (dupla ? 2 : 1)
+}
 const canvases: HTMLCanvasElement[] = []
 
 function desenhar(indice: number) {
@@ -40,7 +49,7 @@ function desenhar(indice: number) {
       const ctx = cv?.getContext('2d')
       if (!cv || !ctx) return
       // Largura real da página na tela (com zoom) x densidade, limitada ao teto de pixels.
-      const larguraTela = (cv.parentElement?.clientWidth || 350) * zoom.value
+      const larguraTela = larguraPagina() * zoom.value
       let escala = (Math.min(2, window.devicePixelRatio || 1) * larguraTela) / base.width
       const area = base.width * base.height * escala * escala
       if (area > MAX_PIXELS) escala *= Math.sqrt(MAX_PIXELS / area)
@@ -48,6 +57,7 @@ function desenhar(indice: number) {
       cv.width = Math.floor(vp.width)
       cv.height = Math.floor(vp.height)
       if (!desenhadas.has(indice)) { cv.width = cv.height = 0; return }
+      largDesenhada.set(indice, larguraTela)
       await p.render({ canvasContext: ctx, viewport: vp, canvas: cv }).promise
     } catch {
       desenhadas.delete(indice)
@@ -57,6 +67,7 @@ function desenhar(indice: number) {
 
 function liberar(indice: number) {
   if (!desenhadas.delete(indice)) return
+  largDesenhada.delete(indice)
   const cv = canvases[indice]
   if (cv) { cv.width = 0; cv.height = 0 }
 }
@@ -66,7 +77,13 @@ function vizinhas(centro: number) {
   centroAtual = centro
   const ini = centro - 1, fim = centro + 2
   for (const i of [...desenhadas]) if (i < ini - 1 || i > fim + 1) liberar(i)
-  for (let i = ini; i <= fim; i++) desenhar(i)
+  // Páginas que ficaram com resolução bem abaixo da necessária (desenhadas antes do ajuste de tamanho) são refeitas.
+  const precisa = larguraPagina() * zoom.value
+  for (let i = ini; i <= fim; i++) {
+    const feita = largDesenhada.get(i)
+    if (feita !== undefined && feita < precisa * 0.8) liberar(i)
+    desenhar(i)
+  }
 }
 
 async function iniciar() {
@@ -115,6 +132,8 @@ async function iniciar() {
     for (const p of paginas) { p.setDensity('soft'); p.setDensity = () => {} }
     flip.on('flip', (e) => { pagina.value = Number(e.data) + 1; vizinhas(Number(e.data)); if (zoom.value > 1) setTimeout(centralizar, 750) })
     vizinhas(0)
+    setTimeout(() => vizinhas(centroAtual), 600)
+    window.addEventListener('resize', aoRedimensionar)
   } catch (e) {
     estado.value = 'erro'
     mensagem.value = 'Não foi possível abrir a revista agora. Você ainda pode baixar o PDF.'
@@ -122,6 +141,8 @@ async function iniciar() {
   }
 }
 
+let temporizador: ReturnType<typeof setTimeout> | undefined
+function aoRedimensionar() { clearTimeout(temporizador); temporizador = setTimeout(() => vizinhas(centroAtual), 400) }
 function proxima() { flip?.flipNext() }
 function anterior() { flip?.flipPrev() }
 // Com zoom, leva a rolagem para a(s) página(s) visível(is): a capa fica à direita, a contracapa à esquerda.
@@ -205,6 +226,8 @@ onMounted(() => {
   document.documentElement.style.overflow = 'hidden'
 })
 onBeforeUnmount(() => {
+  window.removeEventListener('resize', aoRedimensionar)
+  clearTimeout(temporizador)
   const r = rolagem.value
   r?.removeEventListener('touchstart', aoTocar, { capture: true })
   r?.removeEventListener('touchmove', aoMoverToque, { capture: true })
