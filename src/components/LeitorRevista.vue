@@ -54,11 +54,18 @@ function desenhar(indice: number) {
       const area = base.width * base.height * escala * escala
       if (area > MAX_PIXELS) escala *= Math.sqrt(MAX_PIXELS / area)
       const vp = p.getViewport({ scale: escala })
-      cv.width = Math.floor(vp.width)
-      cv.height = Math.floor(vp.height)
-      if (!desenhadas.has(indice)) { cv.width = cv.height = 0; return }
+      // Desenha fora da tela e só então troca a imagem de uma vez: mexer no canvas visível apaga o
+      // conteúdo antes de a nova imagem ficar pronta e causa piscadas durante a virada de página.
+      const fora = document.createElement('canvas')
+      fora.width = Math.floor(vp.width)
+      fora.height = Math.floor(vp.height)
+      await p.render({ canvasContext: fora.getContext('2d')!, viewport: vp, canvas: fora }).promise
+      if (!desenhadas.has(indice)) { fora.width = fora.height = 0; return }
+      cv.width = fora.width
+      cv.height = fora.height
+      ctx.drawImage(fora, 0, 0)
+      fora.width = fora.height = 0
       largDesenhada.set(indice, larguraTela)
-      await p.render({ canvasContext: ctx, viewport: vp, canvas: cv }).promise
     } catch {
       desenhadas.delete(indice)
     }
@@ -75,13 +82,17 @@ function liberar(indice: number) {
 // Só mantém desenhadas a página atual e as vizinhas; as demais são liberadas.
 function vizinhas(centro: number) {
   centroAtual = centro
-  const ini = centro - 1, fim = centro + 2
-  for (const i of [...desenhadas]) if (i < ini - 1 || i > fim + 1) liberar(i)
-  // Páginas que ficaram com resolução bem abaixo da necessária (desenhadas antes do ajuste de tamanho) são refeitas.
+  // Pré-carrega à frente (a próxima virada precisa das páginas já prontas) e um pouco atrás.
+  const ini = centro - (pequena ? 1 : 2), fim = centro + (pequena ? 3 : 5)
+  for (const i of [...desenhadas]) if (i < ini - 2 || i > fim + 2) liberar(i)
   const precisa = larguraPagina() * zoom.value
-  for (let i = ini; i <= fim; i++) {
+  const ordem: number[] = []
+  for (let i = ini; i <= fim; i++) ordem.push(i)
+  ordem.sort((x, y) => Math.abs(x - centro) - Math.abs(y - centro))
+  for (const i of ordem) {
     const feita = largDesenhada.get(i)
-    if (feita !== undefined && feita < precisa * 0.8) liberar(i)
+    // Resolução baixa demais: refaz sem limpar a página atual (a troca acontece quando a nova ficar pronta).
+    if (feita !== undefined && feita < precisa * 0.8) { desenhadas.delete(i); largDesenhada.delete(i) }
     desenhar(i)
   }
 }
@@ -164,7 +175,7 @@ async function definirZoom(novo: number) {
   await nextTick()
   if (livro.value) livro.value.style.transform = ''
   // Zoom pede mais resolução: redesenha as páginas visíveis.
-  for (const i of [...desenhadas]) liberar(i)
+  desenhadas.clear(); largDesenhada.clear()
   vizinhas(centroAtual)
   flip?.update()
   setTimeout(centralizar, 120)
