@@ -21,28 +21,28 @@ const destaques = [...eventos.slice(0, 1), ...noticias.slice(0, 2)]
 </script>
 
 <template>
-  <div class="mx-auto max-w-[1200px] space-y-12 px-5 py-8">
+  <div class="mx-auto max-w-[1200px] space-y-10 px-5 py-6">
     <section data-bloco="agricolino" aria-label="Leituras em destaque">
-      <div class="grid grid-cols-2 gap-3 sm:gap-5">
+      <div class="mx-auto grid max-w-3xl grid-cols-2 gap-3 sm:gap-4">
         <RouterLink v-if="edicao" :to="`/agricolino/${edicao.id}`" data-card="agricolino" class="group flex flex-col overflow-hidden rounded-card bg-white shadow-card transition hover:-translate-y-0.5">
-          <img :src="edicao.capa" :alt="`Capa: ${edicao.titulo}`" class="aspect-[3/4] w-full object-cover" />
-          <div class="flex flex-1 flex-col p-3 sm:p-4">
-            <p class="text-[11px] font-bold uppercase text-primaria">Agricolino · edição mais recente</p>
-            <p class="mt-1 font-titulo text-sm font-bold leading-snug sm:text-base">{{ edicao.titulo }}</p>
-            <span class="mt-auto pt-2 text-xs font-bold uppercase text-primaria">Ler agora →</span>
+          <img :src="edicao.capa" :alt="`Capa: ${edicao.titulo}`" class="aspect-[16/9] w-full object-cover object-top sm:aspect-[2/1]" />
+          <div class="flex flex-1 flex-col px-3 py-2 sm:px-4 sm:py-3">
+            <p class="text-[10px] font-bold uppercase text-primaria sm:text-[11px]">Agricolino · mais recente</p>
+            <p class="mt-0.5 line-clamp-2 font-titulo text-[13px] font-bold leading-snug sm:text-sm">{{ edicao.titulo }}</p>
+            <span class="mt-auto pt-1 text-[11px] font-bold uppercase text-primaria">Ler agora →</span>
           </div>
         </RouterLink>
         <div v-else class="col-span-1"><EstadoVazio mensagem="Nenhuma edição publicada." /></div>
         <RouterLink to="/livro-conea" data-banner="livro-conea" class="group flex flex-col overflow-hidden rounded-card bg-white shadow-card transition hover:-translate-y-0.5">
-          <img :src="livroConea.capa" :alt="`Capa: ${livroConea.titulo}`" class="aspect-[3/4] w-full object-cover" />
-          <div class="flex flex-1 flex-col p-3 sm:p-4">
+          <img :src="livroConea.capa" :alt="`Capa: ${livroConea.titulo}`" class="aspect-[16/9] w-full object-cover object-top sm:aspect-[2/1]" />
+          <div class="flex flex-1 flex-col px-3 py-2 sm:px-4 sm:py-3">
             <p class="text-[11px] font-bold uppercase text-primaria">Livro digital</p>
-            <p class="mt-1 font-titulo text-sm font-bold leading-snug sm:text-base">{{ livroConea.titulo }}</p>
-            <span class="mt-auto pt-2 text-xs font-bold uppercase text-primaria">Ler o livro →</span>
+            <p class="mt-0.5 line-clamp-2 font-titulo text-[13px] font-bold leading-snug sm:text-sm">{{ livroConea.titulo }}</p>
+            <span class="mt-auto pt-1 text-[11px] font-bold uppercase text-primaria">Ler o livro →</span>
           </div>
         </RouterLink>
       </div>
-      <p class="mt-3 text-right text-sm"><RouterLink to="/agricolino" class="font-semibold text-primaria hover:underline">Ver todas as edições do Agricolino</RouterLink></p>
+      <p class="mx-auto mt-2 max-w-3xl text-right text-xs sm:text-sm"><RouterLink to="/agricolino" class="font-semibold text-primaria hover:underline">Ver todas as edições do Agricolino</RouterLink></p>
     </section>
 
     <div data-bloco="destaque" class="grid gap-5 lg:grid-cols-[2fr_1fr]">
